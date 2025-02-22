@@ -11,13 +11,13 @@
         <form class="card col-12 col-md-8 col-lg-6 rounded" id="frmWeather">
             <div class="card-body row">
                 <div class="col-6 text-center align-items-center justify-content-center d-flex" id="divLocation">
-                    <h3 class="text-danger">Location</h3>
+                    <h3 class="text-danger" id="headerLocation"></h3>
                 </div>
                 <div class="col-6 text-center" id="divConditions">
                     <h5>Current Conditions: </h5>
                     <h6>Clouds: </h5>
                     <h6 id="headerTemperature"><span class="text-secondary">Temperature: </span></h5>
-                    <h6>Percipitation: </h5>
+                    <h6 id="headerHumidity">Humidity: </h5>
 
 
                 </div>
@@ -40,7 +40,9 @@
     <script>
 
         //Start global variables
-        const strBaseURL = 'https://api.open-meteo.com/v1/forecast?'
+        const strWeatherBaseURL = 'https://api.open-meteo.com/v1/forecast?'
+        const strGeoBaseURL = 'https://api.geoapify.com/v1/geocode/reverse?'
+        const strGeoAPIKey = '857a46a154b4452280ff0edd25967550'
         //End global variables
         // Get the geolocation from the user using built in navigator
         if("geolocation" in navigator){
@@ -52,12 +54,15 @@
 
                 // call function(s) to get weather data from api\
                 getTempData(intLat, intLon);
+                getHumidityData(intLat, intLon);
+                getLocation(intLat, intLon);
             })
         }
 
+        //Temperature data function
         async function getTempData(intLat, intLon){
             try {
-                const objResponse = await fetch(strBaseURL + `latitude=${intLat}&longitude=${intLon}&current=temperature_2m&temperature_unit=fahrenheit`,{
+                const objResponse = await fetch(strWeatherBaseURL + `latitude=${intLat}&longitude=${intLon}&current=temperature_2m&temperature_unit=fahrenheit`,{
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json'
@@ -82,6 +87,60 @@
             }
         }
         
+        //Humidity data function
+        async function getHumidityData(intLat, intLon){
+            try {
+                const objResponse = await fetch(strWeatherBaseURL + `latitude=${intLat}&longitude=${intLon}&current=relative_humidity_2m&temperature_unit=fahrenheit`,{
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                })
+
+                if(!objResponse.ok){
+                    throw new Error(`HTTP Error Status:${objResponse.status}`);
+                }
+
+                const objData = await objResponse.json();
+                console.log(objData)
+                
+                //append temp to div as h5 header using js
+                document.querySelector('#headerHumidity').innerHTML += `${objData.current.relative_humidity_2m}%`;
+               
+
+
+            }
+            catch(objError){
+                console.error(objError);
+            }
+        }
+
+        async function getLocation(intLat, intLon){
+            try {
+                const objResponse = await fetch(strGeoBaseURL + `lat=${intLat}&lon=${intLon}&apiKey=${strGeoAPIKey}`,{
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                })
+
+                if(!objResponse.ok){
+                    throw new Error(`HTTP Error Status:${objResponse.status}`);
+                }
+
+                const objData = await objResponse.json();
+                console.log(objData)
+                
+                //append temp to div as h5 header using js
+                document.querySelector('#headerLocation').innerHTML += `${objData.features[0].properties.city}`;
+               
+
+
+            }
+            catch(objError){
+                console.error(objError);
+            }
+        }
     </script>
 </body>
 </html>
