@@ -45,20 +45,46 @@
         const strGeoBaseURL = 'https://api.geoapify.com/v1/geocode/reverse?'
         const strGeoAPIKey = '857a46a154b4452280ff0edd25967550'
         //End global variables
-        // Get the geolocation from the user using built in navigator
-        if("geolocation" in navigator){
-            navigator.geolocation.getCurrentPosition((position) =>{
-                const intLat = position.coords.latitude;
-                const intLon = position.coords.longitude;
-                console.log(intLat);
-                console.log(intLon);
 
-                // call function(s) to get weather data from api\
-                getTempData(intLat, intLon);
-                getHumidityData(intLat, intLon);
-                getLocation(intLat, intLon);
-            })
+        // Get the geolocation from the user using built in navigator
+        if ("geolocation" in navigator) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const intLat = position.coords.latitude;
+                    const intLon = position.coords.longitude;
+                    console.log(intLat, intLon);
+
+                    // Call function(s) to get weather data & location data
+                    getTempData(intLat, intLon);
+                    getHumidityData(intLat, intLon);
+                    getLocation(intLat, intLon);
+                },
+                (error) => {
+                    // Handle geolocation errors with SweetAlert
+                    Swal.fire({
+                        icon: "error",
+                        title: "Location Access Denied",
+                        text: getLocationErrorMessage(error),
+                        confirmButtonColor: "#d33"
+                    });
+                }
+            );
         }
+
+        function getLocationErrorMessage(error) {
+            switch (error.code) {
+                case error.PERMISSION_DENIED:
+                    return "You denied the request for location access. Please enable location services.";
+                case error.POSITION_UNAVAILABLE:
+                    return "Location information is unavailable. Please check your internet or GPS.";
+                case error.TIMEOUT:
+                    return "The request to get your location timed out. Try again.";
+                case error.UNKNOWN_ERROR:
+                default:
+                    return "An unknown error occurred while retrieving your location.";
+            }
+        }
+        
 
         //Temperature data function
         async function getTempData(intLat, intLon){
@@ -77,7 +103,7 @@
                 const objData = await objResponse.json();
                 console.log(objData)
                 
-                //append temp to div as h5 header using js
+                //append temp value to temperature header
                 document.querySelector('#headerTemperature').innerHTML += `${objData.current.temperature_2m}&deg;`;
                
 
@@ -105,7 +131,7 @@
                 const objData = await objResponse.json();
                 console.log(objData)
                 
-                //append temp to div as h5 header using js
+                //append humidity value to humidity header
                 document.querySelector('#headerHumidity').innerHTML += `${objData.current.relative_humidity_2m}%`;
                
 
@@ -116,6 +142,7 @@
             }
         }
 
+        //Location data function
         async function getLocation(intLat, intLon){
             try {
                 const objResponse = await fetch(strGeoBaseURL + `lat=${intLat}&lon=${intLon}&apiKey=${strGeoAPIKey}`,{
@@ -132,7 +159,7 @@
                 const objData = await objResponse.json();
                 console.log(objData)
                 
-                //append temp to div as h5 header using js
+                //append city value to location header
                 document.querySelector('#headerLocation').innerHTML += `${objData.features[0].properties.city}`;
                
 
@@ -142,6 +169,39 @@
                 console.error(objError);
             }
         }
+
+        //Weather descrtions from weather codes provided by open-meteo api docs
+        const objweatherDescriptions = {
+            0: "Clear sky",
+            1: "Mainly clear",
+            2: "Partly cloudy",
+            3: "Overcast",
+            45: "Fog",
+            48: "Depositing rime fog",
+            51: "Drizzle (Light)",
+            53: "Drizzle (Moderate)",
+            55: "Drizzle (Dense)",
+            56: "Freezing Drizzle (Light)",
+            57: "Freezing Drizzle (Dense)",
+            61: "Rain (Slight)",
+            63: "Rain (Moderate)",
+            65: "Rain (Heavy)",
+            66: "Freezing Rain (Light)",
+            67: "Freezing Rain (Heavy)",
+            71: "Snow fall (Slight)",
+            73: "Snow fall (Moderate)",
+            75: "Snow fall (Heavy)",
+            77: "Snow grains",
+            80: "Rain showers (Slight)",
+            81: "Rain showers (Moderate)",
+            82: "Rain showers (Violent)",
+            85: "Snow showers (Slight)",
+            86: "Snow showers (Heavy)",
+            95: "Thunderstorm (Slight/Moderate)",
+            96: "Thunderstorm with slight hail",
+            99: "Thunderstorm with heavy hail"
+        };
+
     </script>
 </body>
 </html>
