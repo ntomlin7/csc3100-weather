@@ -74,7 +74,7 @@
         function getLocationErrorMessage(error) {
             switch (error.code) {
                 case error.PERMISSION_DENIED:
-                    return "You denied the request for location access. Please enable location services.";
+                    return "Please enable location services. If you are on an iPhone/using safai, please enable location services for safari in settings.";
                 case error.POSITION_UNAVAILABLE:
                     return "Location information is unavailable. Please check your internet or GPS.";
                 case error.TIMEOUT:
