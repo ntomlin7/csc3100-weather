@@ -4,9 +4,74 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Simple Weather</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootswatch@4.5.2/dist/pulse/bootstrap.min.css" integrity="sha384-L7+YG8QLqGvxQGffJ6utDKFwmGwtLcCjtwvonVZR/Ba2VzhpMwBz51GaXnUsuYbj" crossorigin="anonymous">
 </head>
-<body>
-    <h1>Hey</h1>
-    
+<body class="bg-dark">
+    <div class="d-flex justify-content-center align-items-center vh-100">
+        <form class="card col-12 col-md-8 col-lg-6" id="frmWeather">
+            <div class="card-body row">
+                <div class="col-6 text-center">
+                    <h3 class="text-danger">Location</h3>
+                </div>
+                <div class="col-6 text-center">
+                    <h3>Right</h3>
+                </div>
+            </div>
+        </form>
+    </div>
+
+
+
+
+
+
+
+
+
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+
+        //Start global variables
+        const strBaseURL = 'https://api.open-meteo.com/v1/forecast?'
+        //End global variables
+        // Get the geolocation from the user using built in navigator
+        if("geolocation" in navigator){
+            navigator.geolocation.getCurrentPosition((position) =>{
+                const intLat = position.coords.latitude;
+                const intLon = position.coords.longitude;
+                console.log(intLat);
+                console.log(intLon);
+
+                // call function(s) to get weather data from api\
+                getTempData(intLat, intLon);
+            })
+        }
+
+        async function getTempData(intLat, intLon){
+            try {
+                const objResponse = await fetch(strBaseURL + `latitude=${intLat}&longitude=${intLon}&current=temperature_2m&temperature_unit=fahrenheit`,{
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                })
+
+                if(!objResponse.ok){
+                    throw new Error(`HTTP Error Status:${objResponse.status}`);
+                }
+
+                const objData = await objResponse.json();
+                console.log(objData)
+
+            }
+            catch(objError){
+                console.error(objError);
+            }
+        }
+        
+    </script>
 </body>
 </html>
