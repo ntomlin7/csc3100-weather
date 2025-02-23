@@ -15,9 +15,9 @@
                     <h3 class="text-danger" id="headerLocation"></h3>
                 </div>
                 <div class="col-6 text-center flex-column" id="divConditions">
-                    <h5 class="text-secondary">Current Conditions </h5>
+                    <h4 class="text-primary">Current Conditions </h4>
                     <i class="" id="imgCondition" style="font-size: 30px;"></i>
-                    <h6 id="txtCondition">Clouds: </h6>
+                    <h6 id="txtCondition" class="mt-2 mb-0"></h6>
                     <hr />
                     <div class="d-flex justify-content-center align-items-center mt-3">
                         <h6 class="mx-2" id="headerTemperature"><i class="bi bi-thermometer-half text-warning"></i> </h6>
@@ -25,6 +25,14 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Footer for showing data is courtesy of open-meteo. Inlcudes link to open-meteo and aatribution 4.0 license-->
+            <footer class="text-center text-muted p-2 fixed-bottom">
+                <p>Weather data provided by <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer">Open-Meteo</a>.</p>
+                <p>Licensed under the <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">
+                    Attribution 4.0 International License</a>.</p>
+            </footer>
+            
         </div>
     </div>
 
@@ -170,6 +178,7 @@
             }
         }
 
+        //Weather code data function
         async function getWeatherCodeData(intLat, intLon){
             try {
                 const objResponse = await fetch(strWeatherBaseURL + `latitude=${intLat}&longitude=${intLon}&current=weather_code`,{
@@ -198,7 +207,7 @@
             }
         }
 
-        //Weather descrtions from weather codes provided by open-meteo api docs
+        //Weather code descriptions from weather codes provided by open-meteo api docs (includes icons for each code as well as desc.)
         const objWeatherCodeDescriptions = {
             0: { description: "Clear sky", icon: "bi bi-brightness-high text-warning" },
             1: { description: "Mainly clear", icon: "bi bi-cloud-sun text-warning" },
