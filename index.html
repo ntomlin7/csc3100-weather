@@ -10,12 +10,14 @@
     <div class="d-flex justify-content-center align-items-center min-vh-100">
         <div class="card col-12 col-md-8 col-lg-6 rounded" id="frmWeather">
             <div class="card-body row">
-                <div class="col-6 text-center align-items-center justify-content-center d-flex" id="divLocation">
+                <div class="col-6 text-center align-items-center justify-content-center d-flex flex-column" id="divLocation">
+                    <i class="bi bi-geo-alt text-danger" style="font-size: 30px;"></i>
                     <h3 class="text-danger" id="headerLocation"></h3>
                 </div>
-                <div class="col-6 text-center" id="divConditions">
-                    <h5>Current Conditions: </h5>
-                    <h6>Clouds: </h6>
+                <div class="col-6 text-center flex-column" id="divConditions">
+                    <h5 class="text-secondary">Current Conditions </h5>
+                    <i class="" id="imgCondition" style="font-size: 30px;"></i>
+                    <h6 id="txtCondition">Clouds: </h6>
                     <hr />
                     <div class="d-flex justify-content-center align-items-center mt-3">
                         <h6 class="mx-2" id="headerTemperature"><i class="bi bi-thermometer-half text-warning"></i> </h6>
@@ -48,8 +50,7 @@
 
         // Get the geolocation from the user using built in navigator
         if ("geolocation" in navigator) {
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
+            navigator.geolocation.getCurrentPosition((position) => {
                     const intLat = position.coords.latitude;
                     const intLon = position.coords.longitude;
                     console.log(intLat, intLon);
@@ -58,6 +59,7 @@
                     getTempData(intLat, intLon);
                     getHumidityData(intLat, intLon);
                     getLocation(intLat, intLon);
+                    getWeatherCodeData(intLat, intLon);
                 },
                 (error) => {
                     // Handle geolocation errors with SweetAlert
@@ -72,16 +74,14 @@
         }
 
         function getLocationErrorMessage(error) {
-            switch (error.code) {
-                case error.PERMISSION_DENIED:
-                    return "Please enable location services. If using safai, please enable location services for safari in settings.";
-                case error.POSITION_UNAVAILABLE:
-                    return "Location information is unavailable. Please check your internet or GPS.";
-                case error.TIMEOUT:
-                    return "The request to get your location timed out. Try again.";
-                case error.UNKNOWN_ERROR:
-                default:
-                    return "An unknown error occurred while retrieving your location.";
+            if (error.code === error.PERMISSION_DENIED) {
+                return "Please enable location services. If using Safari, please enable location services for Safari in settings.";
+            } else if (error.code === error.POSITION_UNAVAILABLE) {
+                return "Location information is unavailable. Please check your internet or GPS.";
+            } else if (error.code === error.TIMEOUT) {
+                return "The request to get your location timed out. Try again.";
+            } else {
+                return "An unknown error occurred while retrieving your location.";
             }
         }
         
@@ -170,36 +170,64 @@
             }
         }
 
+        async function getWeatherCodeData(intLat, intLon){
+            try {
+                const objResponse = await fetch(strWeatherBaseURL + `latitude=${intLat}&longitude=${intLon}&current=weather_code`,{
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                })
+
+                if(!objResponse.ok){
+                    throw new Error(`HTTP Error Status:${objResponse.status}`);
+                }
+
+                const objData = await objResponse.json();
+                console.log(objData)
+                
+                //append humidity value to humidity header
+                document.querySelector('#imgCondition').className = objWeatherCodeDescriptions[objData.current.weather_code].icon;
+                document.querySelector('#txtCondition').innerHTML = objWeatherCodeDescriptions[objData.current.weather_code].description;
+               
+
+
+            }
+            catch(objError){
+                console.error(objError);
+            }
+        }
+
         //Weather descrtions from weather codes provided by open-meteo api docs
-        const objweatherDescriptions = {
-            0: "Clear sky",
-            1: "Mainly clear",
-            2: "Partly cloudy",
-            3: "Overcast",
-            45: "Fog",
-            48: "Depositing rime fog",
-            51: "Drizzle (Light)",
-            53: "Drizzle (Moderate)",
-            55: "Drizzle (Dense)",
-            56: "Freezing Drizzle (Light)",
-            57: "Freezing Drizzle (Dense)",
-            61: "Rain (Slight)",
-            63: "Rain (Moderate)",
-            65: "Rain (Heavy)",
-            66: "Freezing Rain (Light)",
-            67: "Freezing Rain (Heavy)",
-            71: "Snow fall (Slight)",
-            73: "Snow fall (Moderate)",
-            75: "Snow fall (Heavy)",
-            77: "Snow grains",
-            80: "Rain showers (Slight)",
-            81: "Rain showers (Moderate)",
-            82: "Rain showers (Violent)",
-            85: "Snow showers (Slight)",
-            86: "Snow showers (Heavy)",
-            95: "Thunderstorm (Slight/Moderate)",
-            96: "Thunderstorm with slight hail",
-            99: "Thunderstorm with heavy hail"
+        const objWeatherCodeDescriptions = {
+            0: { description: "Clear sky", icon: "bi bi-brightness-high text-warning" },
+            1: { description: "Mainly clear", icon: "bi bi-cloud-sun text-warning" },
+            2: { description: "Partly cloudy", icon: "bi bi-cloud-sun text-secondary" },
+            3: { description: "Overcast", icon: "bi bi-cloud text-secondary" },
+            45: { description: "Fog", icon: "bi bi-cloud-fog text-muted" },
+            48: { description: "Depositing rime fog", icon: "bi bi-cloud-fog text-muted" },
+            51: { description: "Drizzle (Light)", icon: "bi bi-cloud-drizzle text-primary" },
+            53: { description: "Drizzle (Moderate)", icon: "bi bi-cloud-drizzle text-primary" },
+            55: { description: "Drizzle (Dense)", icon: "bi bi-cloud-drizzle text-primary" },
+            56: { description: "Freezing Drizzle (Light)", icon: "bi bi-cloud-snow text-info" },
+            57: { description: "Freezing Drizzle (Dense)", icon: "bi bi-cloud-snow text-info" },
+            61: { description: "Rain (Slight)", icon: "bi bi-cloud-rain text-primary" },
+            63: { description: "Rain (Moderate)", icon: "bi bi-cloud-rain-heavy text-primary" },
+            65: { description: "Rain (Heavy)", icon: "bi bi-cloud-rain-heavy text-primary" },
+            66: { description: "Freezing Rain (Light)", icon: "bi bi-snow text-info" },
+            67: { description: "Freezing Rain (Heavy)", icon: "bi bi-snow text-info" },
+            71: { description: "Snow fall (Slight)", icon: "bi bi-cloud-snow text-light" },
+            73: { description: "Snow fall (Moderate)", icon: "bi bi-cloud-snow text-light" },
+            75: { description: "Snow fall (Heavy)", icon: "bi bi-cloud-snow text-light" },
+            77: { description: "Snow grains", icon: "bi bi-snow text-light" },
+            80: { description: "Rain showers (Slight)", icon: "bi bi-cloud-lightning-rain text-primary" },
+            81: { description: "Rain showers (Moderate)", icon: "bi bi-cloud-lightning-rain text-primary" },
+            82: { description: "Rain showers (Violent)", icon: "bi bi-cloud-lightning-rain text-danger" },
+            85: { description: "Snow showers (Slight)", icon: "bi bi-cloud-snow text-light" },
+            86: { description: "Snow showers (Heavy)", icon: "bi bi-cloud-snow text-light" },
+            95: { description: "Thunderstorm (Slight/Moderate)", icon: "bi bi-cloud-lightning text-warning" },
+            96: { description: "Thunderstorm with slight hail", icon: "bi bi-cloud-lightning text-warning" },
+            99: { description: "Thunderstorm with heavy hail", icon: "bi bi-cloud-lightning-rain text-danger" }
         };
 
     </script>
