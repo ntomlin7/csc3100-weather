@@ -4,8 +4,8 @@
     "description": "A minimalistic weather app for everyone.",
     "start_url": "/",
     "display": "fullscreen",
-    "background_color": "#ffffff",
-    "theme_color": "#007bff",
+    "background_color": "#17141f",
+    "theme_color": "#17141f",
     "icons": [
         {
             "src": "/icons/simple_weather2.png",
